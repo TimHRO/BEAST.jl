@@ -12,7 +12,6 @@ function assemble(operator::AbstractSpaceTimeOperator, test_functions, trial_fun
     quadstrat=defaultquadstrat(operator, test_functions, trial_functions))
     stagedtimestep = isa(test_functions.time, StagedTimeStep)
     if stagedtimestep
-        @warn "in new RKCQ left hand side"
         return assemble(RungeKuttaConvolutionQuadrature(operator), test_functions, trial_functions)
     end
     Z, store = allocatestorage(operator, test_functions, trial_functions,

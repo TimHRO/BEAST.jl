@@ -247,12 +247,7 @@ function assemble(bf::BilForm, X::DirectProductSpace, Y::DirectProductSpace;
     M = numfunctions.(spatialbasis(X).factors) .* numstages(X)
     N = numfunctions.(spatialbasis(Y).factors) .* numstages(X)
     MN = numfunctions(X)
-    for s in X.factors
-        @show typeof(s)
-        @show numfunctions(s.space)
-        @show numfunctions(s.time)
-    end
-
+    
     U = BlockArrays.blockedrange(M)
     V = BlockArrays.blockedrange(N)
 
@@ -267,7 +262,7 @@ function assemble(bf::BilForm, X::DirectProductSpace, Y::DirectProductSpace;
         for op in reverse(term.trial_ops)
             y = op[end](op[1:end-1]..., y)
         end
-        #TODO scalar product of a * kernel for RKCQ
+        
         a = term.coeff * term.kernel
         z = materialize(a, x, y)
         lift(z, Block(term.test_id), Block(term.trial_id), U, V)

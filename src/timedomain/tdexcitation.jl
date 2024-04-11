@@ -57,7 +57,8 @@ end
 
 function staged_assemble(exc::TDFunctional, testST::SpaceTimeBasis; 
     quaddata=quaddata, quadrule=quadrule)
-    @warn "New staged time domain approach"
+
+    @warn "staged assemble of the right-hand side"
     testfns = spatialbasis(testST)
     timefns = temporalbasis(testST)
     stageCount = numstages(timefns)
@@ -70,7 +71,6 @@ function staged_assemble(exc::TDFunctional, testST::SpaceTimeBasis;
         assemble!(exc, testfns ⊗ tbsd, store,
             quaddata=quaddata, quadrule=quadrule)
     end
-    @show size(Z)
     return Z
 end
 

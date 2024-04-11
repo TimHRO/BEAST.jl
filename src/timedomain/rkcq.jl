@@ -42,12 +42,12 @@ function assemble(rkcq :: RungeKuttaConvolutionQuadrature,
                   testfns :: SpaceTimeBasis,
                   trialfns :: SpaceTimeBasis)
 
-	#TODO converting timedomainKernel to laplaceKernel
+	@warn "staged assemble of the left-hand side"
 	sol = rkcq.timedomainKernel.speed_of_light
 	numdiffweak = rkcq.timedomainKernel.ws_diffs
 	numdiffhyper = rkcq.timedomainKernel.hs_diffs
-	@info "RKCQ: Converting time domain Kernel to Laplace domain Kernel"
-	LaplaceEFIO(s::T) where {T}= MWSingleLayer3D(-s/sol, s*s/sol, T(sol))
+	@info "converting time domain Kernel to Laplace domain Kernel"
+	LaplaceEFIO(s::T) where {T}= MWSingleLayer3D(-s^numdiffweak/sol, s^(numdiffhyper+1)/sol, T(sol))
 	laplaceKernel = LaplaceEFIO
 	
 	A = testfns.time.A
