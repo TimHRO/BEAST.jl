@@ -1,7 +1,7 @@
 using CompScienceMeshes, BEAST, StaticArrays, LinearAlgebra
 
 radius = 1.0
-Γ = meshsphere(radius=1.0, h=0.45)
+Γ = meshsphere(radius=1.0, h=0.35)
 
 ∂Γ = boundary(Γ)
 
@@ -17,13 +17,6 @@ I = LinearAlgebra.I
 PΣ = Σ * pinv(Σ'*Σ) * Σ'
 PΛH = I - PΣ
 
-Ip = diagm(@SVector ones(size(b,1)))
-@show Ip
-@show size(PΣ)
-
-ℙΣ = kron(PΣ,Ip)
-ℙΛH = kron(I - PΣ,Ip)
-
 X = raviartthomas(Γ)
 sol = 1.0
 Δt, Nt = 10.0, 200
@@ -32,8 +25,13 @@ sol = 1.0
 T = StagedTimeStep(Δt, Nt, c, A, b, 5, 1.001)
 V = X ⊗ T
 
-duration = 2 * 70 * Δt
-delay = 0.7 * duration
+Ip = diagm(@SVector ones(size(b,1)))
+
+ℙΣ = kron(PΣ,Ip)
+ℙΛH = kron(I - PΣ,Ip)
+
+duration = 2 * 20 * Δt
+delay = 1.5 * duration
 amplitude = 1.0
 gaussian = creategaussian(duration, delay, amplitude)
 #Plots.plot(gaussian.(range(0,Nt*Δt,length=Nt)))
@@ -123,3 +121,5 @@ Plotly.plot(patch(geo, norm.(fcr)))
 
 Plots.plot(Θ, real.(getindex.(EF_mom,1)), label="MoM")
 Plots.plot!(Θ, real.(getindex.(c.*EF_mie,1)), label="MIE")
+
+Plots.plot(norm.(jf[1,10:170]), yscale=:log10)
