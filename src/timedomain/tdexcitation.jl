@@ -44,7 +44,8 @@ function assemble(exc::TDFunctional, testST; quaddata=quaddata, quadrule=quadrul
     
     stagedtimestep = isa(temporalbasis(testST), BEAST.StagedTimeStep)
     if stagedtimestep
-        return staged_assemble(exc, testST; quaddata=quaddata, quadrule=quadrule)
+        return staged_projected_assemble(exc, testST; quaddata=quaddata, quadrule=quadrule)
+        #return staged_assemble(exc, testST; quaddata=quaddata, quadrule=quadrule)
     end
     
     testfns = spatialbasis(testST)
@@ -53,6 +54,54 @@ function assemble(exc::TDFunctional, testST; quaddata=quaddata, quadrule=quadrul
     store(v,m,k) = (Z[m,k] += v)
     assemble!(exc, testST, store, quaddata=quaddata, quadrule=quadrule)
     return Z
+end
+
+function staged_projected_assemble(exc::TDFunctional, testST::SpaceTimeBasis;
+    quaddata=quaddata, quadrule=quadrule)
+
+    testfns = spatialbasis(testST)
+    timefns = temporalbasis(testST)
+    
+    Nt = timefns.Nt
+    Δt = timefns.Δt
+    stageCount = numstages(timefns)
+
+    Γ = testfns.geo
+
+    ∂Γ = boundary(Γ)
+
+    setminus(A,B) = submesh(!in(B), A)
+
+    edges = setminus(skeleton(Γ,1), ∂Γ)
+    verts = setminus(skeleton(Γ,0), skeleton(∂Γ,0))
+
+    Σ = Matrix(connectivity(Γ, edges, sign))
+    Λ = Matrix(connectivity(verts, edges, sign))
+
+	#adapt Projector size to stage count "Large Time Step and DC Stable TD-EFIE Discretized With Implicit Runge–Kutta Methods"
+	I = LinearAlgebra.I
+    PΣ = Σ * pinv(Σ'*Σ) * Σ'
+
+	Ip = diagm(@SVector ones(stageCount))
+
+    ℙΣ = kron(PΣ,Ip)
+    ℙΛH = kron(I - PΣ,Ip)
+
+    a = 1.0
+    sol = exc.speedoflight
+
+    gaussian = exc.amplitude.g
+
+    direction, polarisation = exc.direction , exc.polarisation
+
+    exc_e = planewave(polarisation, direction, derive(gaussian), sol)
+    exc_E = planewave(polarisation, direction, gaussian, sol)
+
+    E = staged_assemble(exc_E, testST; quaddata=quaddata, quadrule=quadrule)
+    e = staged_assemble(exc_e, testST; quaddata=quaddata, quadrule=quadrule)
+
+    return -(sol/a*ℙΛH*E + ℙΣ*e)
+
 end
 
 function staged_assemble(exc::TDFunctional, testST::SpaceTimeBasis; 

@@ -6,14 +6,49 @@ struct Gaussian{T}
     delay::T
 end
 
+struct TayloredGaussian{T}
+    scaling::T
+    width::T
+    delay::T
+end
+
 Gaussian(;scaling=1.0, width, delay) = Gaussian(typeof(width)(scaling), width, delay)
-(g::Gaussian)(s::Real) = 4*g.scaling/(g.width*√π) * exp(-(4*(s-g.delay)/g.width)^2)
+function (g::Gaussian)(s::Real) 
+    y = 4*g.scaling/(g.width*√π) * exp(-(4*(s-g.delay)/g.width)^2) #* cos(2π*1e5*s)
+    if exp(-(4*(s-g.delay)/g.width)^2) == 1.0
+        print(s-g.delay)
+        print(" ")
+        #print("maschine precision")
+    end
+    return y
+end
+
+TayloredGaussian(;scaling=1.0, width, delay) = TayloredGaussian(typeof(width)(scaling), width, delay)
+function (g::TayloredGaussian)(s::Real)
+    return TaylorSum(g,s,30)
+end
+
+function TaylorSum(g::TayloredGaussian,s,n)
+    y = -(4*(s-g.delay)/g.width)^2
+    if s-g.delay == 0.0
+        print("maschine precision in taylor")
+    end
+    mysum  = 0
+    for i in 0:n
+        mysum += y^i/factorial(big(i)) 
+    end
+    return 4*g.scaling/(g.width*sqrt(π)) * mysum
+end
 
 
 function creategaussian(width,s0,scaling=one(typeof(width)))
     #f(s) = 4*scaling/(width*sqrt(π)) * exp(-(4*(s-s0)/width)^2)
     Gaussian(scaling, width, s0)
     #f(s) = scaling * exp(-(4*(s-s0)/width)^2)
+end
+
+function createTayloredGaussian(width,s0,scaling=one(typeof(width)))
+    TayloredGaussian(scaling, width, s0)
 end
 
 
@@ -56,7 +91,22 @@ struct ErrorFunction{T}
 end
 
 function (f::ErrorFunction)(s)
-    f.scaling * 0.5 * (1 + erf(4*(s-f.delay)/f.width))
+    #y = f.scaling * 0.5 * (1 + erf(4*(s-f.delay)/f.width))
+    y = 4*(s-f.delay)/f.width
+    #sum = 0
+    #for (i,k) in enumerate(1:2:200)
+        #sum += (-1)^(i+1)*y^k/(k*factorial(big(i)))
+        #print(i)
+        #print(k)
+        #print("  ")
+    #end
+    #if y == 0.5
+    #    print(4*(s-f.delay)/f.width)
+    #    print("  ")
+    #end
+    return f.scaling * 0.5 * (1 + 1 - 1/((1+0.278393*y+0.230389*y^2+0.000972*y^3+0.078108*y^4)^4))
+    #return f.scaling * 0.5 * (1 + 2/sqrt(π) * sum)
+    #return y
 end
 
 function integrate(f::Gaussian)

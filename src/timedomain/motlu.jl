@@ -1,3 +1,5 @@
+#JLD2 is used for saving eigenvalues of Zc - computation of eigenvalues is not neccessary for solution 
+#using JLD2
 motsolve(eq) = td_solve(eq)
 
 function td_solve(eq)
@@ -12,6 +14,22 @@ function td_solve(eq)
     iS = inv(S)
     b = assemble(eq.equation.rhs, eq.test_space_dict)
 
+    #Compute eigenvalues of reccurence relation
+    #Dély, A., F.P. Andriulli, and K. Cools. 2018. “Stable TD-EFIE Discretized with Implicit Runge-Kutta Methods.”
+
+    time_info = temporalbasis(V)
+    Nconv =  time_info.zTransformedTermCount
+    sA = size(A,1)
+    Ac = zeros(sA*Nconv, sA*Nconv)
+    Zc = zeros(sA*Nconv, sA*Nconv)
+    for i in 1:Nconv-1
+        Zc[1:sA, 1+(i-1)*sA:i*sA]=-iS*ConvolutionOperators.timeslice(A,i+1)
+    end
+    for i in 1:Nconv-2
+        Zc[1+sA+(i-1)*sA:(i+1)*sA, 1+(i-1)*sA:i*sA]=Matrix(I,sA,sA)
+    end
+    #ev = eigen(Zc).values
+    #@save "eigenvalues.jld2" ev
     nt = numfunctions(temporalbasis(V))
     marchonintime(iS, A, b, nt)
 end

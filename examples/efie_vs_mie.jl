@@ -1,13 +1,13 @@
 using BEAST, CompScienceMeshes, SphericalScattering, LinearAlgebra, StaticArrays
 
-f = 1.0
+f = 1e8
 c = 2.99792458e8
 μ = 4π * 1e-7
 κ = 2π * f/c
 spRadius = 1.0
 r = 10.0
-ϑ = range(0.0, stop=π, length=18)  # 10° steps
-ϕ = range(0.0, stop=2π, length=36) # 10° steps
+ϑ = range(0.0, stop=0.9999999999999999*π, length=18)  # 10° steps
+ϕ = range(0.0, stop=0.9999999999999999*2π, length=36) # 10° steps
 
 P = [SVector(cos(φ) * sin(θ), sin(φ) * sin(θ), cos(θ)) for θ in ϑ, φ in ϕ]
 points_cartNF = P .* r
@@ -32,9 +32,6 @@ EF_MoM = potential(MWSingleLayerField3D(t), points_cartNF, u, X)
 HF_MoM = potential(BEAST.MWDoubleLayerField3D(wavenumber=κ), points_cartNF, u, X) / (c * μ)
 FF_MoM = -im * f / (2 * c) * potential(MWFarField3D(t), points_cartFF, u, X)
 
-fcr, geo = facecurrents(u, X)
-Plotly.plot(patch(geo, norm.(fcr)))
-
 # Solve the scattering problem by computing the Mie series
 
 sp = PECSphere(radius=spRadius)
@@ -49,8 +46,6 @@ FF = scatteredfield(sp, ex, FarField(points_cartFF))
 diff_EF = round(maximum(norm.(EF - EF_MoM) ./ maximum(norm.(EF))) * 100, digits=4)
 diff_HF = round(maximum(norm.(HF - HF_MoM) ./ maximum(norm.(HF))) * 100, digits=4)
 diff_FF = round(maximum(norm.(FF - FF_MoM) ./ maximum(norm.(FF))) * 100, digits=4)
-
-Plots.plot(ϑ, real.(getindex.(EF_MoM,1)), label="IRK")
 
 print("E-field error: $diff_EF %\n")
 print("H-field error: $diff_HF %\n")
