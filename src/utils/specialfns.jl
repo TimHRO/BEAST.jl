@@ -91,8 +91,8 @@ struct ErrorFunction{T}
 end
 
 function (f::ErrorFunction)(s)
-    #y = f.scaling * 0.5 * (1 + erf(4*(s-f.delay)/f.width))
-    y = 4*(s-f.delay)/f.width
+    y = f.scaling * 0.5 * (1 + erf(4*(s-f.delay)/f.width))
+    #y = 4*(s-f.delay)/f.width
     #sum = 0
     #for (i,k) in enumerate(1:2:200)
         #sum += (-1)^(i+1)*y^k/(k*factorial(big(i)))
@@ -104,7 +104,7 @@ function (f::ErrorFunction)(s)
     #    print(4*(s-f.delay)/f.width)
     #    print("  ")
     #end
-    return f.scaling * 0.5 * (1 + 1 - 1/((1+0.278393*y+0.230389*y^2+0.000972*y^3+0.078108*y^4)^4))
+    #return f.scaling * 0.5 * (1 + 1 - 1/((1+0.278393*y+0.230389*y^2+0.000972*y^3+0.078108*y^4)^4))
     #return f.scaling * 0.5 * (1 + 2/sqrt(π) * sum)
     #return y
 end

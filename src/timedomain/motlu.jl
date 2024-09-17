@@ -18,16 +18,16 @@ function td_solve(eq)
     #Dély, A., F.P. Andriulli, and K. Cools. 2018. “Stable TD-EFIE Discretized with Implicit Runge-Kutta Methods.”
 
     time_info = temporalbasis(V)
-    Nconv =  time_info.zTransformedTermCount
-    sA = size(A,1)
-    Ac = zeros(sA*Nconv, sA*Nconv)
-    Zc = zeros(sA*Nconv, sA*Nconv)
-    for i in 1:Nconv-1
-        Zc[1:sA, 1+(i-1)*sA:i*sA]=-iS*ConvolutionOperators.timeslice(A,i+1)
-    end
-    for i in 1:Nconv-2
-        Zc[1+sA+(i-1)*sA:(i+1)*sA, 1+(i-1)*sA:i*sA]=Matrix(I,sA,sA)
-    end
+    #Nconv =  time_info.zTransformedTermCount
+    #sA = size(A,1)
+    #Ac = zeros(sA*Nconv, sA*Nconv)
+    #Zc = zeros(sA*Nconv, sA*Nconv)
+    #for i in 1:Nconv-1
+    #    Zc[1:sA, 1+(i-1)*sA:i*sA]=-iS*ConvolutionOperators.timeslice(A,i+1)
+    #end
+    #for i in 1:Nconv-2
+    #    Zc[1+sA+(i-1)*sA:(i+1)*sA, 1+(i-1)*sA:i*sA]=Matrix(I,sA,sA)
+    #end
     #ev = eigen(Zc).values
     #@save "eigenvalues.jld2" ev
     nt = numfunctions(temporalbasis(V))

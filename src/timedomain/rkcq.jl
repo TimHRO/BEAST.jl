@@ -160,15 +160,7 @@ function assemble(rkcq :: RungeKuttaConvolutionQuadrature,
 				D_sweakly = SVector{p,Tz}(tmpDiag_sweakly)
 				D_ssweakly = SVector{p,Tz}(tmpDiag_ssweakly)
 				D_hyper = SVector{p,Tz}(tmpDiag_hyper)
-				#MTsM = sFactorized.H * diagm(D_weakly) * sFactorized.invH
-				#MThM = sFactorized.H * diagm(D_hyper) * sFactorized.invH
-				
-				#MTsM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = ℙΛH[(m-1)*p.+(1:p),(n-1)*p.+(1:p)] * sFactorized.H * diagm(D_weakly) * sFactorized.invH * ℙΛH[(m-1)*p.+(1:p),(n-1)*p.+(1:p)]
-				#MThM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = ℙΣ[(m-1)*p.+(1:p),(n-1)*p.+(1:p)] * sFactorized.H * diagm(D_hyper) * sFactorized.invH * ℙΣ[(m-1)*p.+(1:p),(n-1)*p.+(1:p)]
-				#MDTsM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = ℙΛH[(m-1)*p.+(1:p),(n-1)*p.+(1:p)] * sFactorized.H * diagm(D_sweakly) * sFactorized.invH * ℙΣ[(m-1)*p.+(1:p),(n-1)*p.+(1:p)]
-				#MDTsM2[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = ℙΣ[(m-1)*p.+(1:p),(n-1)*p.+(1:p)] * sFactorized.H * diagm(D_sweakly) * sFactorized.invH * ℙΛH[(m-1)*p.+(1:p),(n-1)*p.+(1:p)]
-				#MD2TsM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = ℙΛH[(m-1)*p.+(1:p),(n-1)*p.+(1:p)] * sFactorized.H * diagm(D_ssweakly) * sFactorized.invH * ℙΣ[(m-1)*p.+(1:p),(n-1)*p.+(1:p)]
-			
+
 				MTsM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = sFactorized.H * diagm(D_weakly) * sFactorized.invH
 				MThM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = sFactorized.H * diagm(D_hyper) * sFactorized.invH
 				MDTsM[q+1][(m-1)*p.+(1:p),(n-1)*p.+(1:p)] = sFactorized.H * diagm(D_sweakly) * sFactorized.invH
@@ -178,7 +170,6 @@ function assemble(rkcq :: RungeKuttaConvolutionQuadrature,
 		end
 		a = 1.0
 		smat[q+1] = D
-		#Zz[q+1] = 1/a * MTsM[q+1] + a * MThM[q+1] + a/sol^2 * MD2TsM[q+1] + 1/sol * MDTsM[q+1] + 1/sol * MDTsM2[q+1]
 		Zz[q+1] = 1/a*ℙΛH*MTsM[q+1]*ℙΛH + a*ℙΣ*MThM[q+1]*ℙΣ + a/sol^2*ℙΣ*MD2TsM[q+1]*ℙΣ + 1/sol*ℙΣ*MDTsM[q+1]*ℙΛH + 1/sol*ℙΛH*MDTsM[q+1]*ℙΣ
 	end
 

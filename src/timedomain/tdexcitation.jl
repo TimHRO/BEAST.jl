@@ -61,13 +61,9 @@ function staged_projected_assemble(exc::TDFunctional, testST::SpaceTimeBasis;
 
     testfns = spatialbasis(testST)
     timefns = temporalbasis(testST)
-    
-    Nt = timefns.Nt
-    Δt = timefns.Δt
     stageCount = numstages(timefns)
 
     Γ = testfns.geo
-
     ∂Γ = boundary(Γ)
 
     setminus(A,B) = submesh(!in(B), A)
@@ -94,8 +90,8 @@ function staged_projected_assemble(exc::TDFunctional, testST::SpaceTimeBasis;
 
     direction, polarisation = exc.direction , exc.polarisation
 
-    exc_e = planewave(polarisation, direction, derive(gaussian), sol)
-    exc_E = planewave(polarisation, direction, gaussian, sol)
+    exc_e = planewave(polarisation, direction, gaussian190, sol)
+    exc_E = planewave(polarisation, direction, integrate(gaussian), sol)
 
     E = staged_assemble(exc_E, testST; quaddata=quaddata, quadrule=quadrule)
     e = staged_assemble(exc_e, testST; quaddata=quaddata, quadrule=quadrule)
